@@ -55,7 +55,7 @@ jobs:
             git add .nojekyll
             git commit -m "Initialize Helm chart repository"
             git push origin gh-pages
-            git switch "$GITHUB_SHA"
+            git switch --detach "$GITHUB_SHA"
             git fetch origin gh-pages:refs/remotes/origin/gh-pages
           fi
 
