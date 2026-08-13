@@ -44,7 +44,8 @@ jobs:
           helm lint charts/ai-chat \
             --set secrets.values.authSecret=abcdefghijklmnopqrstuvwxyz123456 \
             --set secrets.values.encryptionKey=abcdefghijklmnopqrstuvwxyz123456 \
-            --set secrets.values.setupClaimToken=claim-token-abcdefghijklmnop
+            --set secrets.values.setupClaimToken=claim-token-abcdefghijklmnop \
+            --set postgresql.password=postgres-password-abcdefghijklmnop
 
       - name: Ensure Pages branch exists
         run: |

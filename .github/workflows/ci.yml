@@ -17,5 +17,5 @@ jobs:
       - run: bun test
       - run: bun run build
       - uses: azure/setup-helm@v4
-      - run: helm lint charts/ai-chat --set secrets.values.authSecret=abcdefghijklmnopqrstuvwxyz123456 --set secrets.values.encryptionKey=abcdefghijklmnopqrstuvwxyz123456 --set secrets.values.setupClaimToken=claim-token-abcdefghijklmnop
-      - run: helm template ai-chat charts/ai-chat --namespace ai-chat --set secrets.values.authSecret=abcdefghijklmnopqrstuvwxyz123456 --set secrets.values.encryptionKey=abcdefghijklmnopqrstuvwxyz123456 --set secrets.values.setupClaimToken=claim-token-abcdefghijklmnop > /tmp/ai-chat.yaml
+      - run: helm lint charts/ai-chat --set secrets.values.authSecret=abcdefghijklmnopqrstuvwxyz123456 --set secrets.values.encryptionKey=abcdefghijklmnopqrstuvwxyz123456 --set secrets.values.setupClaimToken=claim-token-abcdefghijklmnop --set postgresql.password=postgres-password-abcdefghijklmnop
+      - run: helm template ai-chat charts/ai-chat --namespace ai-chat --set secrets.values.authSecret=abcdefghijklmnopqrstuvwxyz123456 --set secrets.values.encryptionKey=abcdefghijklmnopqrstuvwxyz123456 --set secrets.values.setupClaimToken=claim-token-abcdefghijklmnop --set postgresql.password=postgres-password-abcdefghijklmnop > /tmp/ai-chat.yaml

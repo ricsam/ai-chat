@@ -6,4 +6,5 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}{{- end }}
 {{- define "ai-chat.selectorLabels" -}}app.kubernetes.io/name: {{ include "ai-chat.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}{{- end }}
 {{- define "ai-chat.secretName" -}}{{ default (include "ai-chat.fullname" .) .Values.secrets.existingSecret }}{{- end }}
-{{- define "ai-chat.databaseUrl" -}}{{- if .Values.secrets.values.databaseUrl -}}{{ .Values.secrets.values.databaseUrl }}{{- else if .Values.postgresql.enabled -}}postgresql://{{ .Values.postgresql.username }}:{{ .Values.postgresql.password }}@{{ include "ai-chat.fullname" . }}-postgresql:5432/{{ .Values.postgresql.database }}{{- end -}}{{- end }}
+{{- define "ai-chat.postgresqlSecretName" -}}{{ default (include "ai-chat.secretName" .) .Values.postgresql.existingSecret }}{{- end }}
+{{- define "ai-chat.databaseUrl" -}}{{- if .Values.secrets.values.databaseUrl -}}{{ .Values.secrets.values.databaseUrl }}{{- else if .Values.postgresql.enabled -}}{{- $password := required "postgresql.password is required to construct DATABASE_URL; otherwise provide DATABASE_URL through secrets.existingSecret" .Values.postgresql.password -}}postgresql://{{ .Values.postgresql.username }}:{{ $password }}@{{ include "ai-chat.fullname" . }}-postgresql:5432/{{ .Values.postgresql.database }}{{- end -}}{{- end }}

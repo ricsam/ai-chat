@@ -39,7 +39,8 @@ docker build -t ai-chat:local .
 helm lint charts/ai-chat \
   --set secrets.values.authSecret=<secret> \
   --set secrets.values.encryptionKey=<secret> \
-  --set secrets.values.setupClaimToken=<claim>
+  --set secrets.values.setupClaimToken=<claim> \
+  --set postgresql.password=<database-password>
 ```
 
 ## OIDC

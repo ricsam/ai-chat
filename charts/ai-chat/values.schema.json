@@ -20,6 +20,9 @@
     "postgresql": {
       "type": "object",
       "properties": {
+        "password": { "type": "string" },
+        "existingSecret": { "type": "string" },
+        "existingSecretPasswordKey": { "type": "string", "minLength": 1 },
         "persistence": {
           "type": "object",
           "properties": {

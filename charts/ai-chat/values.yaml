@@ -38,8 +38,8 @@ postgresql:
   image: postgres:17.6-alpine
   database: ai_chat
   username: ai_chat
-  password: change-me
   existingSecret: ""
+  existingSecretPasswordKey: POSTGRES_PASSWORD
   persistence:
     storageClass: rook-ceph-block
     size: 1Gi
