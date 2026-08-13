@@ -1,0 +1,110 @@
+---
+title: "Quickstart"
+description: "Install AI Chat from the published Helm repository"
+---
+
+## Prerequisites
+
+You need:
+
+- Kubernetes 1.29 or newer;
+- Helm 3;
+- a dynamic `ReadWriteOnce` StorageClass;
+- PostgreSQL 17, either bundled with the chart or externally managed;
+- an ingress controller and DNS name when you are ready to expose the service.
+
+## 1. Add the chart repository
+
+```bash
+helm repo add ai-chat https://ricsam.github.io/ai-chat
+helm repo update
+helm search repo ai-chat/ai-chat --versions
+```
+
+The chart defaults to the public `ghcr.io/ricsam/ai-chat:0.1.0` image.
+
+## 2. Create the application Secret
+
+Generate strong values locally:
+
+```bash
+export AUTH_SECRET="$(openssl rand -hex 32)"
+export ENCRYPTION_KEY="$(openssl rand -hex 32)"
+export SETUP_TOKEN="$(openssl rand -hex 24)"
+export POSTGRES_PASSWORD="$(openssl rand -hex 24)"
+```
+
+For bundled PostgreSQL, create one Secret containing both application and database credentials:
+
+```bash
+kubectl create namespace ai-chat
+kubectl -n ai-chat create secret generic ai-chat-secrets \
+  --from-literal=DATABASE_URL="postgresql://ai_chat:${POSTGRES_PASSWORD}@ai-chat-ai-chat-postgresql:5432/ai_chat" \
+  --from-literal=BETTER_AUTH_SECRET="$AUTH_SECRET" \
+  --from-literal=SETTINGS_ENCRYPTION_KEY="$ENCRYPTION_KEY" \
+  --from-literal=SETUP_CLAIM_TOKEN="$SETUP_TOKEN" \
+  --from-literal=POSTGRES_PASSWORD="$POSTGRES_PASSWORD"
+```
+
+Store the setup token in your password manager before clearing the shell variables.
+
+## 3. Create values
+
+```yaml values.production.yaml
+secrets:
+  existingSecret: ai-chat-secrets
+
+postgresql:
+  existingSecret: ai-chat-secrets
+  persistence:
+    storageClass: rook-ceph-block
+    size: 8Gi
+
+config:
+  baseUrl: https://chat.example.com
+  setupClaimTokenRequired: true
+
+ingress:
+  enabled: false
+  className: traefik
+  host: chat.example.com
+```
+
+<Warning>
+  Keep ingress disabled until the operator and setup claim token are ready. A
+  publicly exposed, unclaimed installation must require `SETUP_CLAIM_TOKEN`.
+</Warning>
+
+## 4. Render and validate
+
+```bash
+helm template ai-chat ai-chat/ai-chat \
+  --namespace ai-chat \
+  -f values.production.yaml > /tmp/ai-chat.yaml
+
+kubectl apply --dry-run=server -f /tmp/ai-chat.yaml
+```
+
+Fix every admission error before installation.
+
+## 5. Install and verify
+
+```bash
+helm upgrade --install ai-chat ai-chat/ai-chat \
+  --namespace ai-chat \
+  -f values.production.yaml \
+  --wait \
+  --timeout 5m
+
+kubectl -n ai-chat rollout status statefulset/ai-chat-ai-chat-postgresql
+kubectl -n ai-chat rollout status deployment/ai-chat-ai-chat
+kubectl -n ai-chat get pods,pvc,svc
+```
+
+Once both workloads are Ready, follow [first boot](/first-boot). Enable ingress only when you are prepared to claim the administrator account.
+
+## Next steps
+
+- Review [installation patterns](/installation) for external PostgreSQL and private registries.
+- Complete the [first administrator claim](/first-boot).
+- Configure [model access](/providers) and [MCP tools](/mcp).

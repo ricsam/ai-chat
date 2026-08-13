@@ -1,0 +1,36 @@
+---
+title: "Branding"
+description: "Apply runtime white-label identity without restarting the service"
+---
+
+Administrators manage the installation's visual identity from **Administration → Branding**. Changes are stored in PostgreSQL and apply to sign-in and authenticated shells without a pod restart.
+
+## Editable settings
+
+- product name;
+- tagline;
+- logo;
+- favicon;
+- accent color;
+- accent foreground color.
+
+The Helm deployment seeds defaults for a fresh database. Runtime values then become the source of truth for the installation.
+
+## Colors
+
+Choose an accent and foreground pair with sufficient contrast for buttons, selected states, links, and focus affordances. Test both light and dark themes after changing the palette.
+
+## Image uploads
+
+Logo and favicon uploads are validated before storage. Use compact PNG, JPEG, or supported icon assets and avoid embedding confidential metadata.
+
+The public configuration endpoint intentionally returns branding so the sign-in and first-boot screens can render before authentication. Do not place secrets or internal-only text in branding fields.
+
+## Rollout checklist
+
+1. Save the product name and tagline.
+2. Upload the logo and favicon.
+3. Choose accessible accent colors.
+4. Open the sign-in page in a private window.
+5. Verify desktop and mobile layouts in light and dark themes.
+6. Confirm the document title and favicon update as expected.

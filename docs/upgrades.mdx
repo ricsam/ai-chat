@@ -1,0 +1,66 @@
+---
+title: "Upgrades"
+description: "Safely upgrade the application image, chart, and database schema"
+---
+
+The chart runs database migrations in an init container before the application container starts. Treat every upgrade as an application and schema rollout.
+
+## Before upgrading
+
+1. Read the release notes and inspect chart changes.
+2. Back up PostgreSQL and the application Secret.
+3. Record the current chart and image versions.
+4. Pull the latest Helm repository index.
+
+```bash
+helm repo update
+helm search repo ai-chat/ai-chat --versions
+helm -n ai-chat list
+```
+
+## Render the exact upgrade
+
+```bash
+helm template ai-chat ai-chat/ai-chat \
+  --namespace ai-chat \
+  -f values.production.yaml > /tmp/ai-chat-upgrade.yaml
+
+kubectl apply --dry-run=server -f /tmp/ai-chat-upgrade.yaml
+```
+
+Review image tags, Secret references, storage, security contexts, NetworkPolicies, and ingress before applying.
+
+## Upgrade
+
+```bash
+helm upgrade ai-chat ai-chat/ai-chat \
+  --namespace ai-chat \
+  -f values.production.yaml \
+  --wait \
+  --timeout 5m
+```
+
+Then verify:
+
+```bash
+kubectl -n ai-chat rollout status statefulset/ai-chat-ai-chat-postgresql
+kubectl -n ai-chat rollout status deployment/ai-chat-ai-chat
+kubectl -n ai-chat get pods,pvc
+kubectl -n ai-chat logs deployment/ai-chat-ai-chat -c migrate --tail=100
+```
+
+Test health, local administrator sign-in, OIDC, one provider request, and one representative MCP tool call.
+
+## Rollback considerations
+
+```bash
+helm -n ai-chat history ai-chat
+helm -n ai-chat rollback ai-chat <revision> --wait
+```
+
+A Helm rollback does not reverse database migrations. Confirm the older application is compatible with the migrated schema before rolling back. When it is not, restore a coordinated database backup and the matching Secret instead.
+
+<Warning>
+  Never downgrade PostgreSQL data files by changing only the container image.
+  Follow PostgreSQL-supported upgrade or restore procedures.
+</Warning>

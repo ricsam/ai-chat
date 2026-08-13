@@ -1,0 +1,58 @@
+---
+title: "Model providers"
+description: "Connect private OpenAI-compatible endpoints and models"
+---
+
+Provider configuration is bring-your-own-key and private to each user. AI Chat does not provide administrator-shared model credentials.
+
+## Add a provider
+
+Open **Settings → Model access** and select **Add provider**. Enter:
+
+| Field        | Description                                                         |
+| ------------ | ------------------------------------------------------------------- |
+| Name         | A label visible only in your workspace                              |
+| Base URL     | The OpenAI-compatible API root, such as `https://api.openai.com/v1` |
+| API key      | Optional for endpoints that do not require authentication           |
+| Model ID     | Exact identifier sent to the provider                               |
+| Display name | Friendly name shown in the chat model selector                      |
+
+The endpoint must implement OpenAI-compatible chat completions. Save the provider, then use **Test connection** before starting a conversation.
+
+## Credentials
+
+API keys and custom headers are encrypted with the installation's `SETTINGS_ENCRYPTION_KEY`. API responses expose only redacted state such as whether a key exists; decrypted values are never returned to the browser after storage.
+
+<Note>
+  If an API key is compromised, rotate it at the provider and update the saved
+  provider. Rotating the installation encryption key is a separate operational
+  procedure.
+</Note>
+
+## Models
+
+Each model belongs to one provider and stores:
+
+- the provider's model identifier;
+- a display name;
+- enabled state;
+- default-model state;
+- reasoning and tool capability flags.
+
+Only enabled models appear in the conversation model selector. One model can be the user's default.
+
+## Outbound URL policy
+
+Production endpoints must use HTTPS. The application also:
+
+- rejects credentials embedded in URLs;
+- rejects loopback, link-local, cloud metadata, private, and cluster destinations by default;
+- disables redirects;
+- resolves and re-checks destinations before connecting;
+- applies timeouts and response-size limits.
+
+Operators can relax private-address or HTTP restrictions with deployment settings, but doing so broadens the SSRF boundary. See [security](/security).
+
+## Delete a provider
+
+Deleting a provider also deletes its models and removes model references from chats. This action does not delete chat history, but a conversation needs another enabled model before it can generate again.

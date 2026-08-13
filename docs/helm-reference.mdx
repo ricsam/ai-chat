@@ -1,0 +1,79 @@
+---
+title: "Helm reference"
+description: "Important values exposed by the AI Chat Helm chart"
+---
+
+Use `helm show values ai-chat/ai-chat` for the complete defaults. This page explains the operationally important settings.
+
+## Application image
+
+| Value              | Default                  | Description                                    |
+| ------------------ | ------------------------ | ---------------------------------------------- |
+| `replicaCount`     | `1`                      | Application replicas                           |
+| `image.repository` | `ghcr.io/ricsam/ai-chat` | Application image repository                   |
+| `image.tag`        | `0.1.0`                  | Image tag used by migration and app containers |
+| `image.pullPolicy` | `IfNotPresent`           | Kubernetes pull policy                         |
+| `imagePullSecrets` | `[]`                     | Pod image-pull Secret references               |
+
+## Service and ingress
+
+| Value               | Default            | Description                                |
+| ------------------- | ------------------ | ------------------------------------------ |
+| `service.type`      | `ClusterIP`        | Kubernetes Service type                    |
+| `service.port`      | `80`               | Service port mapped to container port 3000 |
+| `ingress.enabled`   | `false`            | Create the Ingress                         |
+| `ingress.className` | `traefik`          | Ingress class                              |
+| `ingress.host`      | `chat.example.com` | Required ingress host                      |
+| `ingress.path`      | `/`                | Routing path                               |
+| `ingress.pathType`  | `Prefix`           | Kubernetes path type                       |
+
+## Runtime configuration
+
+| Value                            | Default                    | Description                                      |
+| -------------------------------- | -------------------------- | ------------------------------------------------ |
+| `config.baseUrl`                 | `https://chat.example.com` | Public application origin                        |
+| `config.allowPrivateEgress`      | `false`                    | Permit private and cluster outbound destinations |
+| `config.allowInsecureHttp`       | `false`                    | Permit HTTP provider and MCP endpoints           |
+| `config.setupClaimTokenRequired` | `true`                     | Inject and require the setup claim token         |
+
+## Application Secret
+
+| Value                          | Default                   | Description                                          |
+| ------------------------------ | ------------------------- | ---------------------------------------------------- |
+| `secrets.existingSecret`       | `""`                      | Existing application Secret name                     |
+| `secrets.keys.databaseUrl`     | `DATABASE_URL`            | Database URL key                                     |
+| `secrets.keys.authSecret`      | `BETTER_AUTH_SECRET`      | Authentication secret key                            |
+| `secrets.keys.encryptionKey`   | `SETTINGS_ENCRYPTION_KEY` | Encryption root key                                  |
+| `secrets.keys.setupClaimToken` | `SETUP_CLAIM_TOKEN`       | First-boot token key                                 |
+| `secrets.values.*`             | empty                     | Inline values used only when Helm creates the Secret |
+
+Prefer `secrets.existingSecret` over inline values.
+
+## PostgreSQL
+
+| Value                                  | Default                | Description                                           |
+| -------------------------------------- | ---------------------- | ----------------------------------------------------- |
+| `postgresql.enabled`                   | `true`                 | Deploy bundled PostgreSQL 17                          |
+| `postgresql.image`                     | `postgres:17.6-alpine` | Database image                                        |
+| `postgresql.database`                  | `ai_chat`              | Database name                                         |
+| `postgresql.username`                  | `ai_chat`              | Database user                                         |
+| `postgresql.existingSecret`            | `""`                   | Secret containing the PostgreSQL password             |
+| `postgresql.existingSecretPasswordKey` | `POSTGRES_PASSWORD`    | Password key in that Secret                           |
+| `postgresql.password`                  | unset                  | Password used when no PostgreSQL Secret is configured |
+| `postgresql.persistence.storageClass`  | `rook-ceph-block`      | Explicit RWO StorageClass                             |
+| `postgresql.persistence.size`          | `1Gi`                  | PVC request                                           |
+
+## Security and resources
+
+| Value                                             | Default                 | Description                            |
+| ------------------------------------------------- | ----------------------- | -------------------------------------- |
+| `resources`                                       | 25m CPU / 128Mi request | Application resource settings          |
+| `postgresql.resources`                            | 25m CPU / 128Mi request | Database resource settings             |
+| `containerSecurityContext.readOnlyRootFilesystem` | `true`                  | Read-only application root filesystem  |
+| `podSecurityContext.runAsNonRoot`                 | `true`                  | Require non-root application execution |
+| `networkPolicy.enabled`                           | `true`                  | Create application NetworkPolicy       |
+| `networkPolicy.internetEgress`                    | `true`                  | Allow TCP 443 egress                   |
+
+## Scheduling
+
+`nodeSelector`, `tolerations`, and `affinity` are passed to the application pod. Inspect rendered manifests whenever cluster admission injects runtime classes, defaults, or limits.

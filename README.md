@@ -14,6 +14,10 @@ A white-label, self-hosted AI conversation workspace. It combines a ChatGPT-styl
 - Runtime white-label name, tagline, and accent configuration.
 - Bun production runtime, PostgreSQL 17, Docker image, and Helm chart.
 
+## Documentation
+
+The Mintlify source lives in [`docs/`](docs). Preview it locally with `cd docs && mint dev`. The documentation workflow validates configuration and internal links on every docs change.
+
 ## Local development
 
 Requirements: Bun 1.3+, Docker, and PostgreSQL 17.

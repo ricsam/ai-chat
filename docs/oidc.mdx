@@ -1,0 +1,64 @@
+---
+title: "OpenID Connect"
+description: "Configure one runtime OIDC provider with controlled account linking and provisioning"
+---
+
+AI Chat supports one runtime-configurable OpenID Connect provider. Configure it from **Administration → Authentication** without restarting the service.
+
+## Register the client
+
+Create a confidential web application in your identity provider. Register the exact callback URL shown in the administration screen:
+
+```text
+<BASE_URL>/api/auth/oauth2/callback/<provider-key>
+```
+
+`BASE_URL` comes from `config.baseUrl`. The provider key becomes part of the callback path, so coordinate changes with the identity provider.
+
+## Configure the provider
+
+Enter:
+
+| Field           | Purpose                                                          |
+| --------------- | ---------------------------------------------------------------- |
+| Provider key    | Stable identifier used in the callback path                      |
+| Button label    | Sign-in button text                                              |
+| Issuer          | OIDC issuer URL                                                  |
+| Discovery URL   | Optional override for discovery metadata                         |
+| Client ID       | Confidential client identifier                                   |
+| Client secret   | Encrypted at rest; leave blank later to preserve the saved value |
+| Allowed domains | Optional comma-separated email-domain allowlist                  |
+
+Select **Test discovery** before enabling the provider.
+
+## Account policy
+
+AI Chat provides independent switches:
+
+- **Link pre-created users by exact email:** link a verified OIDC email to an existing local account.
+- **Automatically provision permitted users:** create an ordinary user after a permitted first OIDC sign-in.
+- **Allowed email domains:** restrict linking and provisioning to listed domains.
+
+Start with JIT provisioning disabled. Pre-create a pilot account, enable exact-email linking, test sign-in, and inspect the claims before broadening access.
+
+## Security behavior
+
+The OIDC flow uses discovery, state, nonce, and S256 PKCE. Email-based linking requires a verified email. JIT-created accounts always receive the ordinary `user` role.
+
+The client secret is stored in a versioned AES-256-GCM envelope and is not returned by configuration APIs.
+
+<Warning>
+  Keep local administrator sign-in working. Do not make an untested OIDC
+  provider the only practical recovery route.
+</Warning>
+
+## Rollout checklist
+
+1. Confirm `config.baseUrl` is the final HTTPS origin.
+2. Register the exact callback URL.
+3. Save the provider while disabled.
+4. Test discovery.
+5. Pre-create a pilot account.
+6. Enable exact-email linking and the provider.
+7. Test sign-in in a private browser session.
+8. Enable domain restrictions and JIT only after successful validation.

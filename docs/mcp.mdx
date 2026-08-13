@@ -1,0 +1,55 @@
+---
+title: "MCP tools"
+description: "Connect remote MCP servers, review discovered tools, and manage trust"
+---
+
+AI Chat supports user-owned remote Model Context Protocol servers over Streamable HTTP and legacy SSE. It does not launch local commands or stdio servers.
+
+## Add a server
+
+Open **Settings → Tools & connections** and select **Add MCP server**. Enter:
+
+- a private display name;
+- the remote HTTPS URL;
+- `Streamable HTTP` or `Legacy SSE` transport;
+- an optional bearer token.
+
+Authentication headers are encrypted at rest. The server URL is evaluated by the same outbound policy used for model providers.
+
+## Discover and trust tools
+
+After saving a server:
+
+1. Select **Test** to connect and discover tools.
+2. Review every displayed tool name and description.
+3. Select **Trust these tools** only if you understand the server and definitions.
+4. Open a conversation and select the server from **Tools**.
+
+AI Chat stores fingerprints for the definitions you approved.
+
+## Definition drift
+
+Before each chat run, AI Chat rediscovers selected-server tools and compares them with trusted fingerprints. A changed or newly added definition sets **Review required** and blocks that server until you explicitly trust the current definitions.
+
+<Warning>
+  Trust applies to the tool definitions presented by the server, not to an
+  independent audit of the server implementation. A malicious or compromised
+  server can still behave differently at execution time.
+</Warning>
+
+## Automatic execution
+
+Tools from selected, trusted servers execute automatically without per-call confirmation. The application:
+
+- namespaces tool names across servers;
+- caps the number of loaded tools;
+- bounds the number of agent steps;
+- limits persisted tool-result size;
+- records tool input, state, and output with the assistant message;
+- closes request-scoped MCP clients after completion, abort, or error.
+
+Only select an MCP server for conversations where automatic execution is appropriate.
+
+## Remove or re-trust a server
+
+Delete removes the server from your account and all chat selections. To accept intentional tool changes, test the server again, inspect the current list, and select **Trust these tools**.

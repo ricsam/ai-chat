@@ -1,0 +1,44 @@
+---
+title: "User management"
+description: "Create, enable, disable, and assign administrator roles safely"
+---
+
+Administrators manage local accounts from **Administration → Users**. Public registration closes when the first administrator claim succeeds.
+
+## Create a user
+
+Enter a name, exact email address, and temporary password. Passwords must contain 12–128 characters with at least one letter and number.
+
+New users are ordinary users by default and must change a temporary password after first sign-in. Changing a password revokes other sessions.
+
+## Roles
+
+- **User:** owns private providers, models, MCP servers, and conversations.
+- **Administrator:** has user capabilities plus installation user, OIDC, and branding management.
+
+Promote or demote accounts from the user table.
+
+## Disable an account
+
+Disabling a user prevents continued authenticated access. Re-enable the account from the same table when appropriate.
+
+The administration API enforces safety rules:
+
+- an administrator cannot disable their own account;
+- an administrator cannot demote themselves;
+- the final enabled administrator cannot be removed through a role or status change;
+- disabled users do not retain usable sessions.
+
+## Email identity
+
+Email comparison is normalized for uniqueness. When OIDC exact-email linking is enabled, the verified email from the identity provider must match the pre-created account.
+
+<Warning>
+  Only enable just-in-time OIDC provisioning after testing domain restrictions
+  and exact claims with a pilot account. JIT users always begin as ordinary
+  users.
+</Warning>
+
+## Recovery access
+
+Keep at least one local administrator credential secured in an operator password manager. Local sign-in remains available when OIDC is enabled and is the recovery path for provider outages or a broken OIDC configuration.

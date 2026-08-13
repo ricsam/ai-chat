@@ -1,0 +1,53 @@
+---
+title: "First boot"
+description: "Safely claim the first administrator account and close public setup"
+---
+
+A fresh database has no users and presents the one-time administrator setup form. The first successful setup transaction becomes the administrator; subsequent setup attempts are rejected.
+
+## Before exposing the service
+
+1. Generate a setup claim token with at least 16 characters.
+2. Store it in the application Secret under `SETUP_CLAIM_TOKEN`.
+3. Keep `config.setupClaimTokenRequired: true`.
+4. Install with ingress disabled and verify that the application and database are Ready.
+5. Coordinate the operator who will create the administrator account.
+
+The public configuration endpoint reports whether setup and a claim token are required, but it never returns the token.
+
+## Claim the administrator
+
+Enable ingress when the operator is ready, then open the application URL. The form asks for:
+
+- administrator name;
+- email address;
+- a 12–128 character password containing a letter and number;
+- the setup claim token, when configured.
+
+Submit the form once. Setup is serialized with a PostgreSQL advisory lock and installation-row lock, so concurrent attempts cannot create multiple first administrators.
+
+<Note>
+  The setup token proves that the claimant coordinated with the operator. It
+  does not replace the administrator password and is not a reusable sign-in
+  credential.
+</Note>
+
+## Verify setup closure
+
+After successful setup:
+
+- the browser enters the chat workspace;
+- the installation records `setupCompletedAt`;
+- ordinary public registration remains closed;
+- further calls to the setup endpoint are rejected;
+- the administrator can create users from **Administration → Users**.
+
+Keep local administrator sign-in available even after configuring OIDC. It is the recovery path for identity-provider outages or configuration mistakes.
+
+## Handling a failed claim
+
+- **Invalid token:** verify that the deployed Secret contains the expected `SETUP_CLAIM_TOKEN` and that the pod was restarted after changing it.
+- **Setup already complete:** do not reset the installation row. Sign in with the existing administrator or use your recovery process.
+- **Database error:** keep ingress disabled, inspect application and migration logs, and repair PostgreSQL before retrying.
+
+Never publish setup tokens, password hashes, or session cookies in support tickets or public issues.

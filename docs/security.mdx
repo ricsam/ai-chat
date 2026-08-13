@@ -1,0 +1,73 @@
+---
+title: "Security model"
+description: "Tenant ownership, encrypted secrets, SSRF defenses, MCP trust, and deployment hardening"
+---
+
+## Tenant boundary
+
+Providers, models, MCP servers, chats, and messages are owned by one user. API handlers authenticate the session and include the user ID in every owned query. Object identifiers alone do not grant access.
+
+Administrators manage accounts and installation configuration. The product does not include administrator-shared model credentials or a chat-browsing interface.
+
+## Authentication
+
+Local credentials use Better Auth and remain available as an administrator recovery path. Setup and account management enforce:
+
+- one serialized first administrator;
+- no public registration after setup;
+- minimum password policy;
+- disabled-user rejection;
+- self-disable and self-demotion prevention;
+- final-enabled-administrator protection;
+- other-session revocation after password changes.
+
+OIDC uses discovery, state, nonce, S256 PKCE, and verified email for linking. JIT users always start as ordinary users.
+
+## Secret encryption
+
+OIDC client secrets, provider API keys and custom headers, and MCP headers use versioned AES-256-GCM envelopes. Authenticated encryption detects tampering.
+
+Protect:
+
+- `SETTINGS_ENCRYPTION_KEY`;
+- `BETTER_AUTH_SECRET`;
+- database credentials;
+- `SETUP_CLAIM_TOKEN` before setup;
+- OIDC, provider, and MCP upstream credentials;
+- registry credentials when private mirrors are used.
+
+## Outbound request policy
+
+Provider and MCP requests share one safe outbound policy. By default it:
+
+- requires HTTPS;
+- rejects URL credentials;
+- rejects loopback, link-local, metadata, private, and cluster destinations;
+- disables redirects;
+- validates resolved addresses before connection;
+- limits request duration and response size.
+
+`ALLOW_PRIVATE_EGRESS=true` and `ALLOW_INSECURE_HTTP=true` are explicit operator exceptions, not normal production defaults.
+
+## MCP trust
+
+Remote MCP tools can execute automatically after selection. AI Chat stores fingerprints for explicitly trusted definitions and blocks a server when definitions drift.
+
+This protects against unnoticed schema changes, but it cannot prove that a remote server faithfully implements its advertised schema. Treat MCP servers as privileged integrations.
+
+## Container and Kubernetes hardening
+
+The application image runs as a non-root user with:
+
+- a read-only root filesystem;
+- all Linux capabilities dropped;
+- privilege escalation disabled;
+- runtime-default seccomp;
+- explicit CPU and memory resources;
+- only a complete `/tmp` `emptyDir` write mount.
+
+The chart's NetworkPolicy allows application ingress, DNS, bundled PostgreSQL, and optional HTTPS internet egress. Enforcement depends on the cluster CNI. Review policies for external databases, proxies, service meshes, IPv6, and private upstreams.
+
+## Reporting vulnerabilities
+
+Do not place credentials, tokens, private conversation content, or sensitive exploit details in a public issue. Contact the repository owner privately through GitHub before coordinated public disclosure.

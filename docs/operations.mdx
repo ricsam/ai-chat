@@ -1,0 +1,70 @@
+---
+title: "Operations"
+description: "Health checks, backups, logs, recovery, and secret handling"
+---
+
+## Health and readiness
+
+The application exposes:
+
+```text
+GET /api/health
+```
+
+A healthy response is:
+
+```json
+{ "ok": true }
+```
+
+The Deployment uses this endpoint for readiness and liveness probes. PostgreSQL uses `pg_isready`.
+
+```bash
+kubectl -n ai-chat get pods,pvc,svc
+kubectl -n ai-chat rollout status deployment/ai-chat-ai-chat
+kubectl -n ai-chat rollout status statefulset/ai-chat-ai-chat-postgresql
+```
+
+## Logs
+
+```bash
+kubectl -n ai-chat logs deployment/ai-chat-ai-chat --tail=200
+kubectl -n ai-chat logs deployment/ai-chat-ai-chat -c migrate --tail=200
+kubectl -n ai-chat logs statefulset/ai-chat-ai-chat-postgresql --tail=200
+kubectl -n ai-chat get events --sort-by=.lastTimestamp
+```
+
+Application logging is structured and redacts known secret fields. Do not enable request-body tracing around authentication, provider, or MCP routes.
+
+## Backups
+
+Back up together:
+
+1. the PostgreSQL database;
+2. `SETTINGS_ENCRYPTION_KEY`;
+3. `BETTER_AUTH_SECRET`;
+4. bundled or external database credentials;
+5. the current Helm values and chart version.
+
+The database contains users, auth records, OIDC configuration, branding, encrypted provider and MCP settings, chats, messages, trusted tool fingerprints, and audit events.
+
+<Warning>
+  A database backup without the matching `SETTINGS_ENCRYPTION_KEY` cannot
+  decrypt saved OIDC, provider, or MCP credentials.
+</Warning>
+
+## Recovery
+
+Restore PostgreSQL and the original application Secret before starting AI Chat. Render and server-side validate the intended chart version, then install with ingress disabled. Verify migrations, application health, local administrator sign-in, and encrypted provider access before enabling ingress.
+
+## Secret rotation
+
+- **Provider or MCP credential:** rotate at the upstream service and update the user's saved configuration.
+- **OIDC client secret:** rotate at the identity provider, save it in Administration, and test discovery/sign-in.
+- **Database password:** coordinate PostgreSQL and `DATABASE_URL`; restart affected pods.
+- **Better Auth secret:** changing it invalidates existing session integrity assumptions; plan a full sign-out.
+- **Settings encryption key:** do not replace it directly. Re-encrypt stored envelopes with an explicit migration first.
+
+## Uninstall behavior
+
+Helm uninstall removes chart-managed workloads and Services. StatefulSet PVC retention depends on Kubernetes and cluster policy. Confirm backups before uninstalling and inspect retained PVCs afterward.

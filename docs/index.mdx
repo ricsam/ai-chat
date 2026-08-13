@@ -1,0 +1,50 @@
+---
+title: "AI Chat"
+description: "White-label, self-hosted AI conversations with private model credentials and trusted MCP tools"
+---
+
+AI Chat is a production-oriented conversation workspace for teams that want to bring their own OpenAI-compatible model access. It combines persistent ChatGPT-style conversations, per-user credentials, remote MCP tools, local recovery accounts, runtime OIDC, and white-label branding in one Helm-deployed service.
+
+<CardGroup cols={2}>
+  <Card title="Install with Helm" icon="package" href="/quickstart">
+    Deploy the published chart with PostgreSQL, protected first boot, and
+    optional ingress.
+  </Card>
+  <Card title="Connect a model" icon="bot" href="/providers">
+    Add an OpenAI-compatible provider and keep credentials private to your
+    account.
+  </Card>
+  <Card title="Add MCP tools" icon="wrench" href="/mcp">
+    Discover, review, and trust remote Streamable HTTP or SSE tools.
+  </Card>
+  <Card title="Review security" icon="shield-check" href="/security">
+    Understand tenant ownership, encrypted secrets, outbound policy, and
+    deployment hardening.
+  </Card>
+</CardGroup>
+
+## What it provides
+
+- A serialized first-account administrator claim protected by an optional setup token.
+- Database-backed local sessions and credentials with a permanent local recovery path.
+- One runtime-configurable OIDC provider with controlled linking and optional just-in-time provisioning.
+- Per-user OpenAI-compatible providers, API keys, endpoint headers, and model catalogs.
+- Per-user remote MCP servers with tool fingerprinting and explicit re-trust after definition drift.
+- Persistent, streaming Markdown conversations with reasoning and tool-call state.
+- Runtime-configurable product name, tagline, logo, favicon, and accessible accent colors.
+- A non-root, read-only Bun container and Helm chart with PostgreSQL 17 support.
+
+## Published artifacts
+
+| Artifact              | Location                                                       |
+| --------------------- | -------------------------------------------------------------- |
+| Helm chart repository | `https://ricsam.github.io/ai-chat`                             |
+| Container image       | `ghcr.io/ricsam/ai-chat`                                       |
+| Source repository     | [github.com/ricsam/ai-chat](https://github.com/ricsam/ai-chat) |
+
+<Warning>
+  MCP tools selected for a conversation execute automatically. Only trust
+  servers and tool definitions you understand.
+</Warning>
+
+Continue with the [quickstart](/quickstart) for a first installation or read the [user guide](/chat) to learn the application.

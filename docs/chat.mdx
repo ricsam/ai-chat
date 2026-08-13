@@ -1,0 +1,55 @@
+---
+title: "Conversations"
+description: "Create, manage, and continue private streaming conversations"
+---
+
+Every conversation belongs to the signed-in user. AI Chat loads canonical history from PostgreSQL and does not trust browser-supplied history.
+
+## Start a conversation
+
+Before creating a chat, add at least one enabled model under **Settings → Model access**.
+
+1. Select **New conversation** in the sidebar.
+2. Choose an enabled model in the composer.
+3. Optionally select trusted MCP servers from **Tools**.
+4. Enter a message and submit it.
+
+The first user message generates a deterministic initial title. Rename or delete a conversation from its menu at any time.
+
+## Streaming responses
+
+Assistant responses stream into the conversation as structured UI parts. Depending on model capabilities, a response can include:
+
+- Markdown and code blocks;
+- provider-supplied reasoning;
+- MCP tool input, execution state, and output;
+- completion or interrupted status.
+
+Use **Stop** to interrupt generation. The server persists the finalized or interrupted assistant turn so reopening the chat shows the canonical state.
+
+## Retry a response
+
+Use the retry action on an assistant message to regenerate it. AI Chat reloads the owned chat history, removes the prior assistant branch as appropriate, and invokes the currently selected model.
+
+## Select a model
+
+The model selector lists enabled models from your private provider configuration. Changing the model updates the current conversation and does not expose its credentials to other users.
+
+## Select tools
+
+The **Tools** menu lists MCP servers that are:
+
+- enabled;
+- trusted;
+- not blocked by tool-definition drift.
+
+Selections are stored per conversation. A selected server's tools can execute automatically while the assistant runs.
+
+<Warning>
+  Tool execution can read data or cause external side effects. Review important
+  outputs and only select servers whose behavior you trust.
+</Warning>
+
+## Conversation privacy
+
+Chat, message, provider, model, and MCP queries are scoped to your authenticated user ID. Administrators manage accounts and installation settings but do not receive a shared provider credential or chat-browsing interface.

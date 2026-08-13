@@ -1,0 +1,116 @@
+---
+title: "Installation"
+description: "Production installation patterns for secrets, PostgreSQL, storage, ingress, and images"
+---
+
+## Published artifacts
+
+```bash
+helm repo add ai-chat https://ricsam.github.io/ai-chat
+helm repo update
+helm show chart ai-chat/ai-chat
+helm show values ai-chat/ai-chat
+```
+
+The public application image is `ghcr.io/ricsam/ai-chat`. Each chart package is also attached to a GitHub release.
+
+## Existing application Secret
+
+Managing the application Secret outside Helm is recommended. Set:
+
+```yaml
+secrets:
+  existingSecret: ai-chat-secrets
+```
+
+The Secret must expose the keys configured under `secrets.keys`. The defaults are:
+
+| Key                       | Purpose                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| `DATABASE_URL`            | Complete PostgreSQL connection URL                                              |
+| `BETTER_AUTH_SECRET`      | Session and authentication signing secret, at least 32 characters               |
+| `SETTINGS_ENCRYPTION_KEY` | Root key for encrypted OIDC, provider, and MCP settings, at least 32 characters |
+| `SETUP_CLAIM_TOKEN`       | One-time operator knowledge required for public first boot                      |
+
+Back up `SETTINGS_ENCRYPTION_KEY` with the database. Restoring one without the other makes encrypted settings unreadable.
+
+## Bundled PostgreSQL
+
+The bundled PostgreSQL 17 StatefulSet uses one whole `ReadWriteOnce` PVC and does not use `subPath`:
+
+```yaml
+postgresql:
+  enabled: true
+  existingSecret: ai-chat-secrets
+  existingSecretPasswordKey: POSTGRES_PASSWORD
+  persistence:
+    storageClass: rook-ceph-block
+    size: 8Gi
+```
+
+Add `POSTGRES_PASSWORD` to `ai-chat-secrets`. The same password must appear in `DATABASE_URL`.
+
+You can instead pass `postgresql.password` at install time, but do not store it in a committed values file:
+
+```bash
+helm upgrade --install ai-chat ai-chat/ai-chat \
+  --namespace ai-chat \
+  --set-string postgresql.password="$POSTGRES_PASSWORD" \
+  -f values.production.yaml
+```
+
+## External PostgreSQL
+
+Disable the bundled database and place the complete connection URL in the application Secret:
+
+```yaml
+postgresql:
+  enabled: false
+
+secrets:
+  existingSecret: ai-chat-secrets
+```
+
+Use PostgreSQL 17 and require transport security when the database is outside the cluster. Back it up independently from the Helm release.
+
+## Ingress and public URL
+
+```yaml
+config:
+  baseUrl: https://chat.example.com
+  setupClaimTokenRequired: true
+
+ingress:
+  enabled: true
+  className: traefik
+  host: chat.example.com
+  path: /
+  pathType: Prefix
+```
+
+`config.baseUrl` must exactly match the externally visible origin. It is used by authentication and to construct the OIDC callback URL. Terminate TLS at the ingress or upstream proxy.
+
+<Warning>
+  Do not expose a fresh installation without a setup claim token. The safer
+  rollout is to install with ingress disabled, verify the workloads, coordinate
+  the operator, and then enable ingress.
+</Warning>
+
+## Private image mirrors
+
+If you mirror the image into a private registry:
+
+```yaml
+image:
+  repository: registry.example.com/platform/ai-chat
+  tag: 0.1.0
+
+imagePullSecrets:
+  - name: registry-pull
+```
+
+The pull secret applies to both the migration init container and application container.
+
+## Storage classes
+
+Set `postgresql.persistence.storageClass` explicitly. Use a network-backed `ReadWriteOnce` class suitable for stateful databases. On r5d-managed clusters, use `rook-ceph-block`.

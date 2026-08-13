@@ -1,0 +1,117 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "AI Chat",
+  "description": "Deploy and operate a white-label, self-hosted AI conversation workspace.",
+  "colors": {
+    "primary": "#6D5BD0",
+    "light": "#7C6AE0",
+    "dark": "#5846B8"
+  },
+  "appearance": {
+    "default": "system"
+  },
+  "icons": {
+    "library": "lucide"
+  },
+  "background": {
+    "decoration": "grid"
+  },
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get started",
+        "pages": ["index", "quickstart", "installation", "first-boot"]
+      },
+      {
+        "group": "Use AI Chat",
+        "pages": ["chat", "providers", "mcp"]
+      },
+      {
+        "group": "Administration",
+        "pages": ["user-management", "oidc", "branding"]
+      },
+      {
+        "group": "Operate",
+        "pages": ["configuration", "operations", "upgrades"]
+      },
+      {
+        "group": "Reference",
+        "pages": ["helm-reference", "architecture", "security"]
+      }
+    ],
+    "global": {
+      "anchors": [
+        {
+          "anchor": "GitHub",
+          "href": "https://github.com/ricsam/ai-chat",
+          "icon": "github"
+        },
+        {
+          "anchor": "Helm repository",
+          "href": "https://ricsam.github.io/ai-chat/index.yaml",
+          "icon": "package"
+        }
+      ]
+    }
+  },
+  "navbar": {
+    "links": [
+      {
+        "type": "github",
+        "href": "https://github.com/ricsam/ai-chat"
+      }
+    ],
+    "primary": {
+      "type": "button",
+      "label": "Install",
+      "href": "/quickstart"
+    }
+  },
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "claude"]
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/ricsam/ai-chat"
+    },
+    "links": [
+      {
+        "header": "Project",
+        "items": [
+          {
+            "label": "Source",
+            "href": "https://github.com/ricsam/ai-chat"
+          },
+          {
+            "label": "Releases",
+            "href": "https://github.com/ricsam/ai-chat/releases"
+          }
+        ]
+      },
+      {
+        "header": "Packages",
+        "items": [
+          {
+            "label": "Helm index",
+            "href": "https://ricsam.github.io/ai-chat/index.yaml"
+          },
+          {
+            "label": "GHCR image",
+            "href": "https://github.com/users/ricsam/packages/container/package/ai-chat"
+          }
+        ]
+      }
+    ]
+  },
+  "metadata": {
+    "timestamp": true
+  },
+  "errors": {
+    "404": {
+      "redirect": false,
+      "title": "Page not found",
+      "description": "Return to the [documentation home](/)."
+    }
+  }
+}
