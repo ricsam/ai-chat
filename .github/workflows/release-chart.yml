@@ -1,0 +1,88 @@
+name: Release Helm chart
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "charts/**"
+      - ".github/workflows/release-chart.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: release-helm-chart
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Publish chart repository
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Lint chart
+        run: |
+          helm lint charts/ai-chat \
+            --set secrets.values.authSecret=abcdefghijklmnopqrstuvwxyz123456 \
+            --set secrets.values.encryptionKey=abcdefghijklmnopqrstuvwxyz123456 \
+            --set secrets.values.setupClaimToken=claim-token-abcdefghijklmnop
+
+      - name: Release chart repository snapshot
+        uses: helm/chart-releaser-action@v1.7.0
+        with:
+          pages_branch: gh-pages
+          packages_with_index: true
+          skip_existing: true
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+
+  deploy-pages:
+    name: Deploy GitHub Pages
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout chart repository
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: site
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload chart repository
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

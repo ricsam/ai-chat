@@ -1,0 +1,67 @@
+replicaCount: 1
+image:
+  repository: ghcr.io/ricsam/ai-chat
+  tag: 0.1.0
+  pullPolicy: IfNotPresent
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+service:
+  type: ClusterIP
+  port: 80
+ingress:
+  enabled: false
+  className: traefik
+  annotations: {}
+  host: chat.example.com
+  path: /
+  pathType: Prefix
+config:
+  baseUrl: https://chat.example.com
+  allowPrivateEgress: false
+  allowInsecureHttp: false
+  setupClaimTokenRequired: true
+secrets:
+  existingSecret: ""
+  keys:
+    databaseUrl: DATABASE_URL
+    authSecret: BETTER_AUTH_SECRET
+    encryptionKey: SETTINGS_ENCRYPTION_KEY
+    setupClaimToken: SETUP_CLAIM_TOKEN
+  values:
+    databaseUrl: ""
+    authSecret: ""
+    encryptionKey: ""
+    setupClaimToken: ""
+postgresql:
+  enabled: true
+  image: postgres:17.6-alpine
+  database: ai_chat
+  username: ai_chat
+  password: change-me
+  existingSecret: ""
+  persistence:
+    storageClass: rook-ceph-block
+    size: 1Gi
+  resources:
+    requests: { cpu: 25m, memory: 128Mi }
+    limits: { memory: 384Mi }
+resources:
+  requests: { cpu: 25m, memory: 128Mi }
+  limits: { memory: 384Mi }
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+  seccompProfile: { type: RuntimeDefault }
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities: { drop: ["ALL"] }
+networkPolicy:
+  enabled: true
+  internetEgress: true
+nodeSelector: {}
+tolerations: []
+affinity: {}

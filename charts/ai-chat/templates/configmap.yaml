@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ai-chat.fullname" . }}
+  labels:
+    {{- include "ai-chat.labels" . | nindent 4 }}
+data:
+  BASE_URL: {{ .Values.config.baseUrl | quote }}
+  ALLOW_PRIVATE_EGRESS: {{ .Values.config.allowPrivateEgress | quote }}
+  ALLOW_INSECURE_HTTP: {{ .Values.config.allowInsecureHttp | quote }}

@@ -1,0 +1,65 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "ai-chat.fullname" . }}-postgresql
+  labels:
+    {{- include "ai-chat.labels" . | nindent 4 }}
+spec:
+  clusterIP: None
+  selector:
+    app.kubernetes.io/component: postgresql
+    {{- include "ai-chat.selectorLabels" . | nindent 4 }}
+  ports: [{ name: postgres, port: 5432, targetPort: postgres }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "ai-chat.fullname" . }}-postgresql
+  labels:
+    {{- include "ai-chat.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "ai-chat.fullname" . }}-postgresql
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: postgresql
+      {{- include "ai-chat.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: postgresql
+        {{- include "ai-chat.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        runAsGroup: 999
+        fsGroup: 999
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: postgresql
+          image: {{ .Values.postgresql.image }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          ports: [{ name: postgres, containerPort: 5432 }]
+          env:
+            - { name: POSTGRES_DB, value: {{ .Values.postgresql.database | quote }} }
+            - { name: POSTGRES_USER, value: {{ .Values.postgresql.username | quote }} }
+            - { name: POSTGRES_PASSWORD, value: {{ .Values.postgresql.password | quote }} }
+            - { name: PGDATA, value: /var/lib/postgresql/data/pgdata }
+          readinessProbe:
+            exec: { command: ["pg_isready", "-U", {{ .Values.postgresql.username | quote }}] }
+          resources:
+            {{- toYaml .Values.postgresql.resources | nindent 12 }}
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/postgresql/data }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: {{ .Values.postgresql.persistence.storageClass }}
+        resources:
+          requests: { storage: {{ .Values.postgresql.persistence.size }} }
+{{- end }}

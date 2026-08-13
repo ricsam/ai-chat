@@ -1,0 +1,29 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "ai-chat.fullname" . }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: app
+      {{- include "ai-chat.selectorLabels" . | nindent 6 }}
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - ports: [{ protocol: TCP, port: 3000 }]
+  egress:
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/component: postgresql
+      ports: [{ protocol: TCP, port: 5432 }]
+    {{- if .Values.networkPolicy.internetEgress }}
+    - ports:
+        - { protocol: TCP, port: 443 }
+    {{- end }}
+{{- end }}

@@ -1,0 +1,21 @@
+image:
+  repository: ghcr.io/ricsam/ai-chat
+  tag: 0.1.0
+imagePullSecrets: []
+ingress:
+  enabled: false
+  className: traefik
+  host: chat-ijcwmzaovy0g.r5d.app
+config:
+  baseUrl: https://chat-ijcwmzaovy0g.r5d.app
+  setupClaimTokenRequired: true
+postgresql:
+  persistence:
+    storageClass: rook-ceph-block
+    size: 1Gi
+  resources:
+    requests: { cpu: 25m, memory: 128Mi }
+    limits: { memory: 384Mi }
+resources:
+  requests: { cpu: 25m, memory: 128Mi }
+  limits: { memory: 384Mi }
