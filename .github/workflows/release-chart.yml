@@ -46,6 +46,19 @@ jobs:
             --set secrets.values.encryptionKey=abcdefghijklmnopqrstuvwxyz123456 \
             --set secrets.values.setupClaimToken=claim-token-abcdefghijklmnop
 
+      - name: Ensure Pages branch exists
+        run: |
+          if ! git ls-remote --exit-code --heads origin gh-pages >/dev/null 2>&1; then
+            git switch --orphan gh-pages
+            git rm -rf .
+            touch .nojekyll
+            git add .nojekyll
+            git commit -m "Initialize Helm chart repository"
+            git push origin gh-pages
+            git switch "$GITHUB_SHA"
+            git fetch origin gh-pages:refs/remotes/origin/gh-pages
+          fi
+
       - name: Release chart repository snapshot
         uses: helm/chart-releaser-action@v1.7.0
         with:
