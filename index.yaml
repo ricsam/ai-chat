@@ -1,0 +1,14 @@
+apiVersion: v1
+entries:
+  ai-chat:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-08-13T06:40:05.44332538Z"
+    description: White-label private AI chat workspace
+    digest: 4f0fb8766de0bad55e4cf4344de5de12a117bebf1251c4a32d40d80f48ffebba
+    name: ai-chat
+    type: application
+    urls:
+    - ai-chat-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-08-13T06:40:05.443350657Z"
