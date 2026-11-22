@@ -39,14 +39,21 @@ function buildAuth(oidc?: OidcConfig & { clientSecret: string }) {
     }),
     emailAndPassword: {
       enabled: true,
+      // Local accounts are created only by first-boot setup and administrators
+      // (direct inserts), never through Better Auth's public sign-up route.
+      // Without this, OIDC just-in-time provisioning would also open
+      // unverified email/password self-registration.
+      disableSignUp: true,
       minPasswordLength: 12,
       maxPasswordLength: 128,
       requireEmailVerification: false,
     },
     account: {
       accountLinking: {
+        // Linking by email requires the provider to report the email as
+        // verified: the OIDC provider is deliberately not a trusted provider,
+        // which would skip that check.
         enabled: oidc?.linkByEmail === true,
-        trustedProviders: oidc ? [oidc.providerKey ?? "oidc"] : [],
       },
     },
     user: {
