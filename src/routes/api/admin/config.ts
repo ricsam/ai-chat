@@ -75,7 +75,7 @@ export const Route = createFileRoute("/api/admin/config")({
               enabled: state.oidcEnabled,
               hasSecret: Boolean(state.oidcSecretEnvelope),
               callbackUrl: new URL(
-                `/api/auth/oauth2/callback/${(state.oidcConfig as { providerKey?: string }).providerKey ?? "oidc"}`,
+                `/api/auth/callback/${(state.oidcConfig as { providerKey?: string }).providerKey ?? "oidc"}`,
                 env().BASE_URL,
               ).toString(),
             },

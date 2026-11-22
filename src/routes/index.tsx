@@ -75,8 +75,8 @@ function Entry() {
 
   const signInOidc = async () => {
     setError("");
-    const result = await signIn.oauth2({
-      providerId: config.auth.providerKey,
+    const result = await signIn.social({
+      provider: config.auth.providerKey,
       callbackURL: "/chat",
     });
     if (result.error) setError(result.error.message || "Single sign-on failed");

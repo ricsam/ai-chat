@@ -52,7 +52,7 @@ helm lint charts/ai-chat \
 From **Administration → Authentication**, configure the issuer, client ID/secret, allowed domains, verified-email account linking, and optional just-in-time provisioning. Register this exact callback:
 
 ```text
-<BASE_URL>/api/auth/oauth2/callback/<provider-key>
+<BASE_URL>/api/auth/callback/<provider-key>
 ```
 
 Keep local administrator login available. Start with JIT disabled, pre-create a pilot user, test discovery, and then enable the provider.
