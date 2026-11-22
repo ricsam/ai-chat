@@ -10,10 +10,14 @@ AI Chat supports one runtime-configurable OpenID Connect provider. Configure it 
 Create a confidential web application in your identity provider. Register the exact callback URL shown in the administration screen:
 
 ```text
-<BASE_URL>/api/auth/oauth2/callback/<provider-key>
+<BASE_URL>/api/auth/callback/<provider-key>
 ```
 
 `BASE_URL` comes from `config.baseUrl`. The provider key becomes part of the callback path, so coordinate changes with the identity provider.
+
+<Note>
+  Releases before Better Auth 1.7 used `<BASE_URL>/api/auth/oauth2/callback/<provider-key>`. After upgrading, replace that redirect URI with the one above in your identity provider, or sign-in fails with a redirect URI mismatch.
+</Note>
 
 ## Configure the provider
 
