@@ -1,4 +1,4 @@
-FROM oven/bun:1.4.4-alpine AS deps
+FROM oven/bun:1.4.5-alpine@sha256:da816670775f4c2b4e990b6b1847cf5540dcdc721a42033dd331ce7a88ba6a3b AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile
@@ -7,7 +7,7 @@ FROM deps AS build
 COPY . .
 RUN bun run typecheck && bun run build
 
-FROM oven/bun:1.4.4-alpine AS runtime
+FROM oven/bun:1.4.5-alpine@sha256:da816670775f4c2b4e990b6b1847cf5540dcdc721a42033dd331ce7a88ba6a3b AS runtime
 LABEL org.opencontainers.image.title="AI Chat" \
       org.opencontainers.image.description="White-label private AI chat workspace" \
       org.opencontainers.image.source="https://github.com/ricsam/ai-chat"
